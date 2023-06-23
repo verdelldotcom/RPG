@@ -1,0 +1,48 @@
+using UnityEngine;
+using System;
+using TMPro;
+using System.Text.RegularExpressions;
+
+public sealed class ReadStringInput : MonoBehaviour
+{
+    TMP_InputField _input_text;
+    TMP_Text _placeholder_text;
+    GameObject _placeholer_text_GO;
+    string _players_name;
+    [SerializeField] MainMenuCamera _main_menu_camera;
+    [SerializeField] PlayerInfo _player_info;
+    void Awake()
+    {
+        _placeholer_text_GO = transform.Find("Text Area").Find("Placeholder").gameObject;
+        _placeholder_text = _placeholer_text_GO.GetComponent<TMP_Text>();
+        _input_text = GetComponent<TMP_InputField>();
+    }
+
+    public void CheckInputForCorrectString()
+    {
+        if (String.IsNullOrWhiteSpace(_input_text.text))
+            _input_text.text = "";
+
+        _input_text.text = _input_text.text.Trim();
+
+        _input_text.text = Regex.Replace(_input_text.text, " {2,}", " ");
+
+        if (_input_text.text.Length < 3)
+        {
+            _input_text.text = "";
+            _placeholer_text_GO.SetActive(true);
+            _placeholder_text.text = "Too short";
+        } else if (_input_text.text.Length > 9)
+        {
+            _input_text.text = "";
+            _placeholer_text_GO.SetActive(true);
+            _placeholder_text.text = "Too Long";
+        }
+        else 
+        {
+            _player_info.Player_name = _input_text.text;
+            print(_player_info.Player_name);
+            _main_menu_camera.CameraMoveToOtherCanvasXCoord(60f);
+        }
+    } 
+}
