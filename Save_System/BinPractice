@@ -1,0 +1,97 @@
+using System.IO;
+using UnityEngine;
+using System.Runtime.Serialization.Formatters.Binary;
+using UnityEngine.SceneManagement;
+
+    public sealed class BinPractice : MonoBehaviour
+    {
+        static BinPractice _practice;
+
+        SavePlayerInfo _saveable_object;
+        [SerializeField] PlayerInfo _playerInfo;
+
+        const string _save_directory1 = "\\Saves\\SaveFolder1";
+
+        private void Start()
+        {
+            if (_practice != null && _practice != this)
+            {
+                Destroy(this);
+            }
+            else if (_practice == null) { }
+            {
+                _practice = this;
+            }
+            DontDestroyOnLoad(this);
+        }
+
+        public void MakeNewDirectory()
+        {
+            int directory_number = 0;
+
+            if (Directory.Exists(Application.persistentDataPath + "\\Saves" + directory_number))
+            {
+                print("Tried Once");
+
+            Retry:
+                if (!Directory.Exists(Application.persistentDataPath + "\\Saves" + directory_number))
+                {
+                    Directory.CreateDirectory(Application.persistentDataPath + "\\Saves" + directory_number);
+                }
+                else
+                {
+                    directory_number += 1;
+
+                    goto Retry;
+                }
+
+            }
+            else
+            {
+                Directory.CreateDirectory(Application.persistentDataPath + "\\Saves" + directory_number);
+            }
+        }
+
+
+        public void WriteToFileBeforSceneTrans(string scenename)
+        {
+            _playerInfo = GameObject.Find("PlayerInfo").GetComponent<PlayerInfo>();
+            _saveable_object = new SavePlayerInfo();
+
+            _saveable_object.Hair_animator_address = _playerInfo.Hair_animator_address;
+            _saveable_object.Skin_animator_address = _playerInfo.Skin_animator_address;
+            _saveable_object.Player_name = _playerInfo.Player_name;
+
+            BinaryFormatter binary_formatter = new BinaryFormatter();
+
+            FileStream file_stream = new FileStream(Application.persistentDataPath + "\\PlayerInfo.data", FileMode.OpenOrCreate);
+
+            binary_formatter.Serialize(file_stream, _saveable_object);
+
+            file_stream.Close();
+            SceneManager.LoadScene(scenename);
+
+        }
+
+        public void PrintObj()
+        {
+            print(Application.persistentDataPath);
+        }
+
+        public void LoadPlayerInfo()
+        {
+            _playerInfo = GameObject.Find("PlayerInfo").GetComponent<PlayerInfo>();
+            _saveable_object = new();
+            FileStream file_stream = new FileStream(Application.persistentDataPath + "\\PlayerInfo.data", FileMode.Open);
+
+            BinaryFormatter _binary_formatter = new BinaryFormatter();
+
+            _saveable_object = (SavePlayerInfo)_binary_formatter.Deserialize(file_stream);
+
+            file_stream.Close();
+            _playerInfo.Hair_animator_address = _saveable_object.Hair_animator_address;
+            _playerInfo.Skin_animator_address = _saveable_object.Skin_animator_address;
+            _playerInfo.Player_name = _saveable_object.Player_name;
+        }
+    }
+
