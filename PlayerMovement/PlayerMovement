@@ -1,0 +1,73 @@
+using UnityEngine;
+using VeesInputActions;
+
+namespace VeesPlayerMovement
+{
+    public sealed class PlayerMovement : MonoBehaviour
+    {
+        IA_Player _IA_player;
+        Rigidbody2D _RB_player;
+
+        bool _can_move;
+
+        void Awake()
+        {
+            _IA_player = new IA_Player();
+            _RB_player = GetComponent<Rigidbody2D>();
+            _can_move = true;
+        }
+
+        void OnEnable()
+        {
+            _IA_player.Enable();
+        }
+
+        void OnDisable()
+        {
+            _IA_player.Disable();
+        }
+
+        Vector3 _player_movement;
+        void Update()
+        {
+
+            if (_can_move)
+            {
+                _player_movement.x = (_IA_player.Player.Move.ReadValue<Vector2>().x * 50f);
+                _player_movement.y = (_IA_player.Player.Move.ReadValue<Vector2>().y) * 50f;
+
+
+                if (_RB_player.velocity.magnitude > 5)
+                {
+                    _RB_player.velocity = Vector2.ClampMagnitude(_RB_player.velocity, 1);
+                }
+            }
+            
+        }
+
+        void FixedUpdate()
+        {
+            _RB_player.AddForce(_player_movement);
+
+            if (_RB_player.velocity.magnitude > 5)
+            {
+                print("Fast af boi");
+            }
+
+            if (_RB_player.velocity.magnitude > 5)
+            {
+                _RB_player.velocity = new Vector2(5, 5);
+            }
+
+            if (_player_movement == Vector3.zero)           
+                _RB_player.velocity = Vector3.zero;
+            
+        }
+
+        public void PlayerCanMove() =>
+            _can_move = true;
+
+        public void DisableMovement() =>
+            _can_move = false;
+    }
+}
