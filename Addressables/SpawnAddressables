@@ -1,0 +1,84 @@
+using UnityEngine;
+using UnityEngine.ResourceManagement.AsyncOperations;
+using UnityEngine.AddressableAssets;
+using VeesPlayerMovement;
+using UnityEngine.UI;
+public static class SpawnAddressables 
+{
+
+    static RuntimeAnimatorController _hair_animator, _skin_animator;
+    static GameObject _hair_gameobject, _skin_gameobject , loadedGameObject;
+    static PlayerWalkAnimator _player_walk_animator;
+
+
+    // You cannot load components using addressables you have to first load the gameobject then call GetComponent<>()
+    // Hence all the mumbo jumbo
+    public static void LoadHairAnimator(string address)
+    {
+        Addressables.LoadAssetAsync<GameObject>(address).Completed += (asyncOperationHandle) =>
+        {
+            if (asyncOperationHandle.Status == AsyncOperationStatus.Succeeded)
+            {
+                _hair_gameobject = asyncOperationHandle.Result;
+                Debug.Log( "Async Result" + asyncOperationHandle.Result);
+                Debug.Log("Game Objects name " + _hair_gameobject.name);
+
+                _player_walk_animator = GameObject.Find("Player").GetComponent<PlayerWalkAnimator>();
+                _player_walk_animator._player_hair_animator.runtimeAnimatorController = _hair_gameobject.GetComponent<Animator>().runtimeAnimatorController;
+            }
+            else
+            {
+                Debug.Log("Failed to load Skin ");
+            }
+        };
+    }
+
+    public static void SetFacePortraitImage(string address)
+    {
+        Image _player_image;
+        Addressables.LoadAssetAsync<GameObject>(address).Completed += (asyncOperationHandle) =>
+        {
+            
+            if (asyncOperationHandle.Status == AsyncOperationStatus.Succeeded)
+            {
+                _player_image = GameObject.Find("Portrait Image").GetComponent<Image>();
+                loadedGameObject = asyncOperationHandle.Result;
+                _player_image.sprite = loadedGameObject.GetComponent<SpriteRenderer>().sprite;
+            }
+        };
+    }
+
+    public static void SetHairPortratiImage(string address)
+    {
+        Image _hair_image;
+
+        Addressables.LoadAssetAsync<GameObject>(address).Completed += (asyncOperationHandle) =>
+        {
+
+            if (asyncOperationHandle.Status == AsyncOperationStatus.Succeeded)
+            {
+                _hair_image = GameObject.Find("Player_Hair").GetComponent<Image>();
+                loadedGameObject = asyncOperationHandle.Result;
+                _hair_image.sprite = loadedGameObject.GetComponent<SpriteRenderer>().sprite;
+            }
+        };
+    }
+
+    public static void LoadSkinAnimator(string address)
+    {
+        Addressables.LoadAssetAsync<GameObject>(address).Completed += (asyncOperationHandle) =>
+        {
+            if (asyncOperationHandle.Status == AsyncOperationStatus.Succeeded)
+            {
+                Debug.Log( "Asynct Result" + asyncOperationHandle.Result);
+                _skin_gameobject = asyncOperationHandle.Result;
+                Debug.Log("Game Objects name " + _skin_gameobject.name);
+                _player_walk_animator._player_skin_animator.runtimeAnimatorController = _skin_gameobject.GetComponent<Animator>().runtimeAnimatorController;
+            }
+            else
+            {
+                Debug.Log("Failed to load Skin ");
+            }
+        };
+    }
+}
